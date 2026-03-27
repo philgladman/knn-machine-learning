@@ -86,44 +86,44 @@ print(encoded_columns)
 
 
 
-mse = mean_squared_error(y_test, y_pred)
-rmse = np.sqrt(mse)  # Root mean squared error
-mae = mean_absolute_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+# mse = mean_squared_error(y_test, y_pred)
+# rmse = np.sqrt(mse)  # Root mean squared error
+# mae = mean_absolute_error(y_test, y_pred)
+# r2 = r2_score(y_test, y_pred)
 
-print("\nModel Performance Metrics:")
-print(f"R² Score: {r2:.4f}")  # Higher is better; 1.0 indicates perfect prediction
-print(f"Root Mean Squared Error: {rmse:.2f}")  # Lower is better
-print(f"Mean Absolute Error: {mae:.2f}")  # Lower is better
-
-
-joblib.dump(pipeline, 'vehicle_emissions_pipeline.joblib')
+# print("\nModel Performance Metrics:")
+# print(f"R² Score: {r2:.4f}")  # Higher is better; 1.0 indicates perfect prediction
+# print(f"Root Mean Squared Error: {rmse:.2f}")  # Lower is better
+# print(f"Mean Absolute Error: {mae:.2f}")  # Lower is better
 
 
-metrics = ['R²', 'RMSE', 'MAE']
-values = [r2, rmse, mae]
-
-plt.bar(metrics, values, color=['blue', 'orange', 'green'])
-plt.title('Model Performance Metrics')
-plt.ylabel('Value')
-for i, v in enumerate(values):
-    plt.text(i, v + 0.02, f"{v:.2f}", ha='center')
-plt.show()
+# joblib.dump(pipeline, 'vehicle_emissions_pipeline.joblib')
 
 
+# metrics = ['R²', 'RMSE', 'MAE']
+# values = [r2, rmse, mae]
+
+# plt.bar(metrics, values, color=['blue', 'orange', 'green'])
+# plt.title('Model Performance Metrics')
+# plt.ylabel('Value')
+# for i, v in enumerate(values):
+#     plt.text(i, v + 0.02, f"{v:.2f}", ha='center')
+# plt.show()
 
 
-plt.figure(figsize=(8, 6))
-plt.scatter(y_test, y_pred, alpha=0.6)
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', linestyle='--')
-plt.title('Actual vs Predicted CO₂ Emissions')
-plt.xlabel('Actual CO₂ Emissions')
-plt.ylabel('Predicted CO₂ Emissions')
-plt.show()
 
 
-corr_matrix = data[numerical_cols + ['CO2_Emissions']].corr()
-plt.figure(figsize=(10, 8))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
-plt.title('Correlation Heatmap')
-plt.show()
+# plt.figure(figsize=(8, 6))
+# plt.scatter(y_test, y_pred, alpha=0.6)
+# plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', linestyle='--')
+# plt.title('Actual vs Predicted CO₂ Emissions')
+# plt.xlabel('Actual CO₂ Emissions')
+# plt.ylabel('Predicted CO₂ Emissions')
+# plt.show()
+
+
+# corr_matrix = data[numerical_cols + ['CO2_Emissions']].corr()
+# plt.figure(figsize=(10, 8))
+# sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+# plt.title('Correlation Heatmap')
+# plt.show()

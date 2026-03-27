@@ -4,3 +4,7 @@
 python3 -m venv path/to/venv
 source path/to/venv/bin/activate
 python3 -m pip install kagglehub
+
+### Notes
+- Use `RandomForestRegressor` when `y` is a number you want to predict.
+- Use `RandomForestClassifier` when `y` is a label/category you want to classify.
