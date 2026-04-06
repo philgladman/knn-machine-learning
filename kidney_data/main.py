@@ -7,12 +7,31 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 
+### Next steps
+# - Create functions so can use either classifiers or regressions
+#  - So will need to have if logic like, if target = label then use classifier, if = number, use regressors
+# - Create functions so can pass in sanitized data into 5 diff models to see how they all perform
+#  - for classifiers use these 5
+#    - LogisticRegression
+#    - DecisionTreeClassifier
+#    - RandomForestClassifier
+#    - KNeighborsClassifier
+#    - SVC
+## - Do the same thing for the top/common regressors
+
+
 ## Use when target is a number (ie. CO2 Emissions = 100 or 250)
+## These are considered "Regressors", they predict numbers
 # from sklearn.ensemble import RandomForestRegressor
 # from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 ## Use when target is a label (ie. Kidney Stage = "Healthy Kidney" or "Severe CKD (Stage 4)")
-from sklearn.ensemble import RandomForestClassifier
+## These are considered "Classifier" estimator, they predict categories
+from sklearn.linear_model import LogisticRegression ## Good for linear models, when relationship is fairly simple, small data
+from sklearn.svm import SVC ## Try to separate classes with an optimal boundary
+from sklearn.tree import DecisionTreeClassifier ## Good for non linear models, and feature interactions
+from sklearn.ensemble import RandomForestClassifier ## Good for non linear models, and feature interactions
+from sklearn.neighbors import KNeighborsClassifier ## Predict based on nearby training examples
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 import numpy as np
@@ -23,6 +42,7 @@ test_size_percentage = 0.20
 random_state_number = 42
 
 ## Load the dataset from a CSV file
+## kidney dataset can be found here - https://www.kaggle.com/datasets/priyankabarik/chronic-kidney-disease-ckd-clinical-dataset
 data = pd.read_csv('kidney_data/Training_CKD_dataset.csv')
 # new_data = pd.read_csv('kidney_data/Testing_CKD_dataset.csv')
 
@@ -128,6 +148,22 @@ encoded_columns = pipeline.named_steps['preprocessor'].named_transformers_['cat'
 print(encoded_columns.tolist())
 print("#"*50)
 
+## Display importance of each variable
+model = pipeline.named_steps['model']
+all_feature_names = numerical_cols + encoded_columns.tolist()
+importances = model.feature_importances_
+
+feature_importance_df = pd.DataFrame({
+    'feature': all_feature_names,
+    'importance': importances
+}).sort_values(by='importance', ascending=False)
+
+print("#"*50)
+print("\nPrinting Parameters by importance level:\n")
+print(feature_importance_df)
+print("#"*50)
+
+## Display results
 print("#"*50)
 print("\nModel Performance Metrics:")
 accuracy = accuracy_score(y_test, y_pred)
@@ -176,3 +212,75 @@ print(f"Accuracy: {accuracy:.4f}") ## Higher is better; 1.0 indicates perfect pr
 print("\nClassification Report:") ## precision, recall, and F1-score for each class -  ## Higher is better; 1.0 indicates perfect prediction
 print(classification_report(y_true, predictions))
 print("#"*50)
+
+
+### Interpreting other variables
+family_history_yes = data[data['Family_History_Kidney'] == 'Yes']
+ckd_cases = family_history_yes[family_history_yes['Target'] != 'Healthy Kidney']
+percentage = (len(ckd_cases) / len(family_history_yes)) * 100
+print(f"Percentage with family history who had CKD: {percentage:.2f}%")
+
+family_history_no = data[data['Family_History_Kidney'] == 'No']
+ckd_cases_no = family_history_no[family_history_no['Target'] != 'Healthy Kidney']
+percentage_no = (len(ckd_cases_no) / len(family_history_no)) * 100
+print(f"Percentage with family history: {percentage:.2f}%")
+print(f"Percentage without family history: {percentage_no:.2f}%")
+
+print("#"*50)
+print("#"*50)
+print("#"*50)
+print("#"*50)
+print("#"*50)
+print("#"*50)
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+logistic_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', LogisticRegression(max_iter=1000))
+])
+
+svm_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', SVC())
+])
+
+tree_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', DecisionTreeClassifier(random_state=42))
+])
+
+kneighbor_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', KNeighborsClassifier(n_neighbors=5))
+])
+
+# Training the models
+logistic_pipeline.fit(X_train, y_train)
+svm_pipeline.fit(X_train, y_train)
+tree_pipeline.fit(X_train, y_train)
+kneighbor_pipeline.fit(X_train, y_train)
+
+# Making predictions with each model
+log_reg_preds = logistic_pipeline.predict(X_test)
+svm_preds = svm_pipeline.predict(X_test)
+tree_preds = tree_pipeline.predict(X_test)
+kneighbor_preds = kneighbor_pipeline.predict(X_test)
+
+# Store model predictions in a dictionary
+# this makes it easier to iterate through each model
+# and print the results. 
+model_preds = {
+    "Logistic Regression": log_reg_preds,
+    "Support Vector Machine": svm_preds,
+    "Decision Tree": tree_preds,
+    "KNeighbors": kneighbor_preds
+}
+
+for model, preds in model_preds.items():
+    accuracy = accuracy_score(y_test, preds)
+    print(f"{model} Accuracy: {accuracy:.4f}") 
+    print(f"{model} Results:\n{classification_report(y_test, preds)}", sep="\n\n")
